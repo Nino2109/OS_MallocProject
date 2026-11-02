@@ -1,5 +1,3 @@
 build/ 
 *.o
-*.a
-*.so
-my_malloc_test
+test_main
