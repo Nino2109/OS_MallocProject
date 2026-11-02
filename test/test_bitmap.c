@@ -7,17 +7,16 @@ static void test_init_zeros(void){
     uint8_t buf[4]; //32 bit (4byte) per test
     memset(buf, 0xFF, sizeof(buf));
     bitmap_t bmap;
-    bitmap_init(&bm, buf, 32);
-    for(int i=0; i<32; i++){
-        if (bitmap_is_set(bmap, i)!=0) assert("Errore init non zeri");
+    bitmap_init(&bmap, buf, 32);
+    for(uint32_t i=0; i<32; i++){
+        assert(bitmap_is_set(&bmap, i)==0 && "Errore init non zeri\n");
     }
-    printf("test_init_zeros OK");
-    return 0;
+    printf("test_init_zeros OK\n");
 }
 
 static void test_set_single_bit(void){
     
-    return 0;
+    return;
 }
 
 int main(void){
