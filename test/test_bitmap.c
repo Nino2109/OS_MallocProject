@@ -14,7 +14,7 @@ static void test_init_zeros(void){
     printf("test_init_zeros OK\n");
 }
 
-static void test_set_single_bit(void){
+static void test_set_bit(void){
     uint8_t buf[4];
     bitmap_t bmap; 
     bitmap_init(&bmap, buf, 32);
@@ -23,15 +23,38 @@ static void test_set_single_bit(void){
         bitmap_set(&bmap, i);
         for(uint32_t j=0; j<32; j++){
             if(j<=i) assert(bitmap_is_set(&bmap, j)==1 && "Errore nel settare i bit\n");
-            else if(j>1) assert(bitmap_is_set(&bmap, j)==0 && "Errore nel settare i bit");
+            else if(j>i) assert(bitmap_is_set(&bmap, j)==0 && "Errore nel settare i bit");
         }
     }
     printf("test_set_single_bit OK\n");
 }
 
+static void test_byte_edges(void){
+    uint8_t buf[4];
+    bitmap_t bmap;
+    bitmap_init(&bmap, buf, 32);
+
+    bitmap_set(&bmap, 7);
+    assert(bitmap_is_set(&bmap, 7)==1);
+    assert(bitmap_is_set(&bmap, 6)==0);
+    assert(bitmap_is_set(&bmap, 8)==0);
+
+    bitmap_set(&bmap, 8);
+    assert(bitmap_is_set(&bmap, 7)==1);
+    assert(bitmap_is_set(&bmap, 9)==0);
+    assert(bitmap_is_set(&bmap, 8)==1);
+
+    bitmap_clear(&bmap, 7);
+    assert(bitmap_is_set(&bmap, 7)==0);
+    assert(bitmap_is_set(&bmap, 8)==1);
+
+    printf("test_byte_edges OK\n");
+}
+
 int main(void){
     test_init_zeros();
-    test_set_single_bit();
+    test_set_bit();
+    test_byte_edges();
 
     printf("Tutti i test della bitmap sono passati\n");
     return 0;
