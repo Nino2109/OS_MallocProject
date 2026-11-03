@@ -1,3 +1,2 @@
-build/ 
-*.o
-test_main
+build/
+test_bitmap
