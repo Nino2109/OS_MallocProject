@@ -81,10 +81,23 @@ static void test_clear_bit(void){
     printf("test_clear_bit OK\n");
 }
 
+static void test_bytes_needed(void){
+    assert(bitmap_bytes_needed(0)==0);
+    assert(bitmap_bytes_needed(1)==1);
+    assert(bitmap_bytes_needed(8)==1);
+    assert(bitmap_bytes_needed(9)==2);
+    assert(bitmap_bytes_needed(16)==2);
+    assert(bitmap_bytes_needed(17)==3);
+
+    printf("test_bytes_needed OK\n");
+}
+
 int main(void){
     test_init_zeros();
     test_set_bit();
     test_byte_edges();
+    test_clear_bit();
+    test_bytes_needed();
 
     printf("Tutti i test della bitmap sono passati\n");
     return 0;
