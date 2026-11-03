@@ -23,9 +23,11 @@ static void test_set_bit(void){
         bitmap_set(&bmap, i);
         for(uint32_t j=0; j<32; j++){
             if(j<=i) assert(bitmap_is_set(&bmap, j)==1 && "Errore nel settare i bit\n");
-            else if(j>i) assert(bitmap_is_set(&bmap, j)==0 && "Errore nel settare i bit");
+            else if(j>i) assert(bitmap_is_set(&bmap, j)==0 && "Errore nel settare i bit\n");
         }
     }
+
+
     printf("test_set_single_bit OK\n");
 }
 
@@ -49,6 +51,28 @@ static void test_byte_edges(void){
     assert(bitmap_is_set(&bmap, 8)==1);
 
     printf("test_byte_edges OK\n");
+}
+
+static void test_clear_bit(void){
+    uint8_t buf[4];
+    bitmap_t bmap; 
+    bitmap_init(&bmap, buf, 32);
+
+    //funzione base
+    bitmap_set(&bmap, 3);
+    bitmap_set(&bmap, 5);
+    bitmap_clear(&bmap, 3);
+    assert(bitmap_is_set(&bmap,3)==0);
+    assert(bitmap_is_set(&bmap, 4) == 0);
+    assert(bitmap_is_set(&bmap,5)==1);
+
+    //non ha problemi con la ripetizione; clear di 0 fa sempre 0 e non sporca
+    bitmap_clear(&bmap, 3);
+    assert(bitmap_is_set(&bmap,3)==0);
+    assert(bitmap_is_set(&bmap, 4) == 0);
+    assert(bitmap_is_set(&bmap,5)==1);
+    
+    printf("test_clear_bit OK\n");
 }
 
 int main(void){
