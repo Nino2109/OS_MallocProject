@@ -35,12 +35,12 @@ void buddy_free(buddy_t* bud, void* ptr);
 
 // funzioni sugli indici, da 1 (radice) 
 //calcola il livello del nodo
-uint32_t buddy_level(uint32_t i);
+uint32_t buddy_level(uint32_t idx);
 //calcola il parent del nodo 
-uint32_t buddy_parent(uint32_t i);
+uint32_t buddy_parent(uint32_t idx);
 //calcola il fratello del nodo
-uint32_t buddy_sibling(uint32_t i);
+uint32_t buddy_sibling(uint32_t idx);
 //calcola l'offset del nodo nel memory_pool
-size_t   buddy_node_offset(const buddy_t *bud, uint32_t i);
+size_t   buddy_node_offset(const buddy_t *bud, uint32_t idx);
 
 #endif
