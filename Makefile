@@ -6,7 +6,7 @@ all: test_bitmap test_buddy
 test_bitmap: src/bitmap.c test/test_bitmap.c
 	$(CC) $(CFLAGS) $^ -o $@
 
-test_buddy: src/buddy.c test/test_buddy.c
+test_buddy: src/bitmap.c src/buddy.c test/test_buddy.c
 	$(CC) $(CFLAGS) $^ -o $@
 
 clean: 
