@@ -3,6 +3,16 @@
 #include "bitmap.h"
 
 
+int32_t buddy_level_for_size(const buddy_t* bud, size_t size){
+    if(size==0 || size>bud->memory_size -BUDDY_HEADER_SIZE) return -1;
+    size_t need = size + BUDDY_HEADER_SIZE;
+    int32_t level = bud->num_levels;
+    while ((bud->memory_size >> level)<need){
+        level--;
+    }
+    return level;
+}
+
 //ret 0=ok; -1 = param incoerenti o buffer troppo piccolo
 int buddy_init(buddy_t* bud, uint8_t* buffer, size_t buffer_size, uint8_t* memory, size_t memory_size, uint32_t num_levels){
     if(bud==NULL || buffer==NULL || memory==NULL || num_levels<1 || num_levels>=31){

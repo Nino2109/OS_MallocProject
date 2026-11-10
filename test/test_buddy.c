@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <stdint.h>
 #include "buddy.h"
 #include "bitmap.h"
 
@@ -11,6 +12,21 @@
 static uint8_t bufs[2 * BITMAP_BYTES]; 
 static uint8_t pool[BUDDY_TOTAL_SIZE];
 
+
+static void test_buddy_level_for_size(void){
+    static buddy_t bud;
+    buddy_init(&bud, bufs, sizeof(bufs), pool, sizeof(pool),BUDDY_NUM_LEVELS);
+    assert(buddy_level_for_size(&bud, 1)==15);
+    assert(buddy_level_for_size(&bud, 24)==15);
+    assert(buddy_level_for_size(&bud, 25)==14);
+    assert(buddy_level_for_size(&bud, 100)==13);
+    assert(buddy_level_for_size(&bud, BUDDY_TOTAL_SIZE-BUDDY_HEADER_SIZE)==0);
+    assert(buddy_level_for_size(&bud, BUDDY_TOTAL_SIZE-BUDDY_HEADER_SIZE+1)==-1);
+    assert(buddy_level_for_size(&bud, 0)==-1);
+    assert(buddy_level_for_size(&bud, SIZE_MAX)==-1);
+
+    printf("test_buddy_level_for_size OK\n");    
+}
 
 static void test_buddy_calc_size(void){
     assert(buddy_calc_size(BUDDY_NUM_LEVELS)== (2 * BITMAP_BYTES)); 
@@ -131,7 +147,6 @@ int main(void){
     test_buddy_calc_size();
     test_buddy_init_ok();
     test_buddy_init_fail();
-
-    printf("Tutti test buddy OK\n");
+    test_buddy_level_for_size();
     return 0;
 }

@@ -21,6 +21,9 @@ typedef struct {
     uint32_t num_levels; //numero di livelli della struttura
 } buddy_t;
 
+//calcolo del livello necessario, ret 0 se ok, -1 altrimenti
+int32_t buddy_level_for_size(const buddy_t *bud, size_t size);
+
 //byte di buffer necessari per le 2 bitmap
 size_t buddy_calc_size(uint32_t num_levels);
 
