@@ -148,5 +148,7 @@ int main(void){
     test_buddy_init_ok();
     test_buddy_init_fail();
     test_buddy_level_for_size();
+
+    printf("Tutti i test del buddy OK\n");
     return 0;
 }
