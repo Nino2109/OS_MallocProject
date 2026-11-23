@@ -13,10 +13,70 @@ static uint8_t bufs[2 * BITMAP_BYTES];
 static uint8_t pool[BUDDY_TOTAL_SIZE];
 
 
+//funzione ausiliaria per buddy_init
+static void fresh_buddy(buddy_t *bud){
+    int ret = buddy_init(bud, bufs, sizeof(bufs), pool, sizeof(pool), BUDDY_NUM_LEVELS);
+    assert(ret == 0);
+}
+
+static void test_buddy_find_free_node(void){
+    static buddy_t bud;
+
+    //caso 1: albero vuoto, radice unico blocco
+    fresh_buddy(&bud);
+    assert(buddy_find_free_node(&bud, 0) == 1);
+    assert(buddy_find_free_node(&bud, 1) == 0);
+    assert(buddy_find_free_node(&bud, 3) == 0);
+    assert(buddy_find_free_node(&bud, BUDDY_NUM_LEVELS) == 0);
+
+    //caso 2: radice allocata
+    fresh_buddy(&bud);
+    bitmap_set(&bud.alloc_bits, 1);
+    assert(buddy_find_free_node(&bud, 0) == 0);
+    assert(buddy_find_free_node(&bud, 1) == 0);
+    assert(buddy_find_free_node(&bud, BUDDY_NUM_LEVELS) == 0);
+
+    //caso3: radice spezzata, i due figli sono liberi
+    fresh_buddy(&bud);
+    bitmap_set(&bud.split_bits, 1);
+    assert(buddy_find_free_node(&bud, 0) == 0);
+    assert(buddy_find_free_node(&bud, 1) == 2);
+
+    //caso4: radice spezzata, nodo 2 allocato -> resta il 3
+    fresh_buddy(&bud);
+    bitmap_set(&bud.split_bits,1);
+    bitmap_set(&bud.alloc_bits,2);
+    assert(buddy_find_free_node(&bud, 1) == 3);
+
+    //caso5: radice spezzata, nodi 2 e 3 allocati -> nessuno libero
+    fresh_buddy(&bud);
+    bitmap_set(&bud.split_bits, 1);
+    bitmap_set(&bud.alloc_bits, 2);
+    bitmap_set(&bud.alloc_bits, 3);
+    assert(buddy_find_free_node(&bud, 1) == 0);
+
+    //caso6 1 e 2 spezzati, 4 allocato. liv2: 4 occupato, trova 5. liv1: 2 spezzato, trova 3
+    fresh_buddy(&bud);
+    bitmap_set(&bud.split_bits, 1);
+    bitmap_set(&bud.split_bits, 2);
+    bitmap_set(&bud.alloc_bits, 4);
+    assert(buddy_find_free_node(&bud, 2) == 5);
+    assert(buddy_find_free_node(&bud, 1) == 3);
+
+    //caso7 tutto un liv occupato. spezzo radice e alloco figli 
+    fresh_buddy(&bud);
+    bitmap_set(&bud.split_bits, 1);
+    bitmap_set(&bud.alloc_bits, 2);
+    bitmap_set(&bud.alloc_bits, 3);
+    assert(buddy_find_free_node(&bud, 2) == 0);
+    assert(buddy_find_free_node(&bud, BUDDY_NUM_LEVELS) == 0);
+
+    printf("test_buddy_find_free_node OK\n");
+}
+
 static void test_buddy_level_for_size(void){
     static buddy_t bud;
-    buddy_init(&bud, bufs, sizeof(bufs), pool, sizeof(pool),BUDDY_NUM_LEVELS);
-    assert(buddy_level_for_size(&bud, 1)==15);
+    fresh_buddy(&bud);
     assert(buddy_level_for_size(&bud, 24)==15);
     assert(buddy_level_for_size(&bud, 25)==14);
     assert(buddy_level_for_size(&bud, 100)==13);
@@ -24,6 +84,7 @@ static void test_buddy_level_for_size(void){
     assert(buddy_level_for_size(&bud, BUDDY_TOTAL_SIZE-BUDDY_HEADER_SIZE+1)==-1);
     assert(buddy_level_for_size(&bud, 0)==-1);
     assert(buddy_level_for_size(&bud, SIZE_MAX)==-1);
+    assert(buddy_level_for_size(&bud, BUDDY_MIN_BLOCK_SIZE - BUDDY_HEADER_SIZE) == BUDDY_NUM_LEVELS);
 
     printf("test_buddy_level_for_size OK\n");    
 }
@@ -148,6 +209,7 @@ int main(void){
     test_buddy_init_ok();
     test_buddy_init_fail();
     test_buddy_level_for_size();
+    test_buddy_find_free_node();
 
     printf("Tutti i test del buddy OK\n");
     return 0;

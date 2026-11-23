@@ -13,14 +13,38 @@ int32_t buddy_level_for_size(const buddy_t* bud, size_t size){
     return level;
 }
 
+
+uint32_t buddy_find_free_node(const buddy_t* bud, uint32_t level){
+    assert(bud!=NULL);
+    assert(level <= bud->num_levels);
+    for (uint32_t n=1u<<level; n<=(1u<<(level+1))-1; n++){
+        if (bitmap_is_set(&bud->split_bits, n) || bitmap_is_set(&bud->alloc_bits, n)){
+            continue;
+        }
+        int ok = 1;
+        uint32_t p = n;
+        while(p>1){
+            p = buddy_parent(p);
+            if (!bitmap_is_set(&bud->split_bits, p)){
+                ok = 0;
+                break;
+            }
+        }
+        if (ok==1) return n;
+    }
+    return 0;
+}
+
+
+
 //ret 0=ok; -1 = param incoerenti o buffer troppo piccolo
 int buddy_init(buddy_t* bud, uint8_t* buffer, size_t buffer_size, uint8_t* memory, size_t memory_size, uint32_t num_levels){
     if(bud==NULL || buffer==NULL || memory==NULL || num_levels<1 || num_levels>=31){
         return -1;
     }
     size_t min_block = memory_size >> num_levels;
-    if ((min_block & (min_block -1)) != 0) return -1;
     if((min_block<<num_levels)!=memory_size) return -1;
+    if ((min_block & (min_block -1)) != 0) return -1;
     if(min_block <= BUDDY_HEADER_SIZE) return -1;
     if(buffer_size < buddy_calc_size(num_levels)) return -1;
 
